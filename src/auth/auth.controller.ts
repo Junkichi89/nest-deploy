@@ -1,13 +1,18 @@
 import { AuthDto } from './dto/auth.dto';
 import { AuthService } from './auth.service';
-import { Body, Controller, HttpCode, HttpStatus, Post, Req, Res } from '@nestjs/common';
-import { Msg } from './interfaces/auth.interface';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Req, Res } from '@nestjs/common';
+import { Msg, Csrf } from './interfaces/auth.interface';
 import { Request, Response } from 'express';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
   
+  @Get('/csrf')
+  getCsrfToken(@Req() req: Request): Csrf {
+    return { csrfToken: req.csrfToken() }
+  }
+
   @Post('signup')
   singUp(@Body() dto: AuthDto): Promise<Msg> {
     return this.authService.singUp(dto)
@@ -23,7 +28,7 @@ export class AuthController {
     const jwt = await this.authService.login(dto);
     res.cookie('access_token', jwt.accessToken, {
       httpOnly: true,
-      secure: false, // localのみfalseとしておく　httpsできるようにtrueを設定する
+      secure: true, // localのみfalseとしておく　httpsできるようにtrueを設定する
       sameSite: 'none',
       path: '/'
     })
@@ -40,7 +45,7 @@ export class AuthController {
   ) {
     res.cookie('access_token', '', {
       httpOnly: true,
-      secure: false, // localのみfalseとしておく　httpsできるようにtrueを設定する
+      secure: true, // localのみfalseとしておく　httpsできるようにtrueを設定する
       sameSite: 'none',
       path: '/'
     })

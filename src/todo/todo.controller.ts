@@ -1,7 +1,7 @@
 import { CreateTaskDto } from './dto/create-task.dto';
 import { TodoService } from './todo.service';
 import { AuthGuard } from '@nestjs/passport';
-import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Param, ParseIntPipe, Patch, Post, Req, UseGuards, HttpStatus, Delete } from '@nestjs/common';
 import { Request } from 'express';
 import { identity } from 'rxjs';
 import { Task } from '@prisma/client';
@@ -37,5 +37,14 @@ export class TodoController {
     @Body() dto: UpdateTaskDto,
   ): Promise<Task> {
     return this.todoService.updateTaskById(req.user.id, taskId, dto)
+  }
+
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete(':id')
+  deleteTaskById(
+    @Req() req: Request,
+    @Param('id', ParseIntPipe) taskId: number,
+  ): Promise<void> {
+    return this.todoService.deleteTaskById(req.user.id, taskId)
   }
 }
